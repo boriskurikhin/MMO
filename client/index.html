@@ -3,12 +3,22 @@
 <html>
 	<head>
 		<title>PvE MMO</title>
-		
-		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 	</head>
 
 	<body>
-		<canvas id="ctx" width="500" height="500"></canvas>
+		<canvas id="ctx" width="500" height="500" style="border:1px solid #000000"></canvas>
 		<script type="text/javascript" src="javascript/main.js"></script>
+		<script>
+			var socket = io();
+			var canv = document.getElementById('ctx').getContext("2d");	
+			
+			socket.on('newPosition', function(data) {
+				canv.clearRect(0, 0, 500, 500);
+				for (var i = 0; i < data.length; i++) {
+					canv.fillText(data[i].number, data[i].x, data[i].y);
+				}
+			});
+		</script>
 	</body>
 </html>
