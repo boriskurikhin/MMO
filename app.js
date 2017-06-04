@@ -105,6 +105,11 @@ Player.onDisconnect = function(socket){
 }
 
 Player.update = function () {
+	
+	if (Math.random() < 0.1) {
+		Bullet(Math.random() * 360);
+	}
+	
 	var pack = [];
 	
 	for (var i in Player.list) {
@@ -119,6 +124,46 @@ Player.update = function () {
 	}
 	return pack;
 }
+
+var Bullet = function (theta) {
+	var self = Entity();
+	self.id = Math.random();
+	
+	self.speedX = Math.cos(theta / 180 * Math.PI) * 10;
+	self.speedY = Math.sin(theta / 180 * Math.PI) * 10;
+	
+	self.timer = 0;
+	self.toRemove = false;
+	var super_update = self.update;
+	
+	self.update = function(){
+		if (self.timer++ > 100) {
+			self.toRemove = true;
+		}
+		super_update();
+	}
+	Bullet.list[self.id] = self;
+	return self;
+}
+
+Bullet.list = {};
+
+Bullet.update = function () {
+	var pack = [];
+	
+	for (var i in Bullet.list) {
+		//Loops through each currently connected socket
+		var b = Bullet.list[i];
+		b.update();
+		pack.push({
+			x:b.x,
+			y:b.y
+		});
+	}
+	return pack;
+}
+
+
 
 var io = require('socket.io') (serv, {});
 io.sockets.on('connection', function(socket){
@@ -138,7 +183,11 @@ io.sockets.on('connection', function(socket){
 
 setInterval(function(){
 	//Server update function
-	var pack = Player.update();
+	
+	var pack = {
+		player: Player.update(),
+		bullet: Bullet.update()
+	}
 	
 	for (var i in socketList) {
 		//Sends clients back the updated information
