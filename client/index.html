@@ -2,7 +2,7 @@
 
 <html>
 	<head>
-		<title>PvE MMO</title>
+		<title>PvP MMO</title>
 		<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 	</head>
 
@@ -19,6 +19,67 @@
 					canv.fillText(data[i].number, data[i].x, data[i].y);
 				}
 			});
+			
+			document.onkeydown = function(e) {
+				if (e.keyCode === 68) { //d
+					socket.emit('keyPress', {
+						inputId: 'right',
+						state: true
+					});
+				}
+				
+				if (e.keyCode === 65) { //a
+					socket.emit('keyPress', {
+						inputId: 'left',
+						state: true
+					});
+				}
+				
+				if (e.keyCode === 83) { //s
+					socket.emit('keyPress', {
+						inputId: 'down',
+						state: true
+					});
+				}
+				
+				if (e.keyCode === 87) { //w
+					socket.emit('keyPress', {
+						inputId: 'up',
+						state: true
+					});
+				}
+			}
+			
+			document.onkeyup = function(e) {
+				if (e.keyCode === 68) { //d
+					socket.emit('keyPress', {
+						inputId: 'right',
+						state: false
+					});
+				}
+				
+				if (e.keyCode === 65) { //a
+					socket.emit('keyPress', {
+						inputId: 'left',
+						state: false
+					});
+				}
+				
+				if (e.keyCode === 83) { //s
+					socket.emit('keyPress', {
+						inputId: 'down',
+						state: false
+					});
+				}
+				
+				if (e.keyCode === 87) { //w
+					socket.emit('keyPress', {
+						inputId: 'up',
+						state: false
+					});
+				}
+			}
+			
 		</script>
 	</body>
 </html>
