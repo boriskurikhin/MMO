@@ -8,10 +8,24 @@
 
 	<body>
 		<canvas id="ctx" width="500" height="500" style="border:1px solid #000000"></canvas>
+		
+		<div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll;">
+			<div>
+				<p>Hello!</p>
+			</div>
+		</div>
+		
+		<form id="chat-form">
+		<input id="chat-input" type="text" style="width:500px;"/>
+		</form>
+		
 		<script type="text/javascript" src="javascript/main.js"></script>
 		<script>
 			var socket = io();
-			var canv = document.getElementById('ctx').getContext("2d");	
+			var canv = document.getElementById('ctx').getContext("2d");
+			var chatText = document.getElementById('chat-text');
+			var chatInput = document.getElementById('chat-input');
+			var chatForm = document.getElementById('chat-form');
 			
 			socket.on('newPosition', function(data) {
 				canv.clearRect(0, 0, 500, 500);
@@ -22,6 +36,24 @@
 					canv.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 10, 10);
 				}
 			});
+			
+			socket.on('addToChat', function(data) {
+				chatText.innerHTML += '<div><p>' + data + '</p></div>';
+			});
+			
+			socket.on('evalAnswer', function(data) {
+				console.log(data);
+			});
+			
+			chatForm.onsubmit = function(e) {
+				e.preventDefault();
+				if (chatInput.value[0] === '/')
+					socket.emit('evalServer', chatInput.value.slice(1));
+				else
+					socket.emit('sendMsgToServer', chatInput.value);
+				chatInput.value = '';
+			}
+			
 			
 			document.onkeydown = function(e) {
 				if (e.keyCode === 68) { //d

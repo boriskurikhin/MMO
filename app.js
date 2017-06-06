@@ -164,8 +164,10 @@ Bullet.update = function () {
 }
 
 
+var DEBUG = false;
 
 var io = require('socket.io') (serv, {});
+
 io.sockets.on('connection', function(socket){
 	//Upon connection to the server, each socket is given unique properties.
 	socket.id = Math.random();
@@ -179,6 +181,21 @@ io.sockets.on('connection', function(socket){
 		delete socketList[socket.id];
 		Player.onDisconnect(socket);
 	});
+	
+	socket.on('sendMsgToServer', function(data) {
+		var playerName = ('' + socket.id).slice(2,7);
+		for (var i in socketList) {
+			socketList[i].emit('addToChat', playerName + ':' + data);
+		}
+	});
+	
+	socket.on('evalServer', function(data) {
+		if (!DEBUG) //makes sure that only in debug mode
+			return;
+		var res = eval(data);
+		socket.emit('evalAnswer', res);
+	});
+	
 });
 
 setInterval(function(){
