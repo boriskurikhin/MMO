@@ -7,21 +7,79 @@
 	</head>
 
 	<body>
-		<canvas id="ctx" width="500" height="500" style="border:1px solid #000000"></canvas>
-		
-		<div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll;">
-			<div>
-				<p>Hello!</p>
-			</div>
+		<div id="signDiv">
+			Username: <input id="signDiv-username" type="text"/><br>
+			Password: <input id="signDiv-password" type="password"/><br>
+			<button id="signDiv-signIn">Sign In</button>
+			<button id="signDiv-signUp">Sign Up</button>
 		</div>
 		
-		<form id="chat-form">
-		<input id="chat-input" type="text" style="width:500px;"/>
-		</form>
+		<div id="gameDiv" style="display:none">
+			<canvas id="ctx" width="500" height="500" style="border:1px solid #000000"></canvas>
+
+			<div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll;">
+				<div>
+					<p>Hello!</p>
+				</div>
+			</div>
+			<form id="chat-form">
+				<input id="chat-input" type="text" style="width:500px;"/>
+			</form>
+		</div>
 		
-		<script type="text/javascript" src="javascript/main.js"></script>
+		
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.2/socket.io.js"></script>
+		
 		<script>
+			
 			var socket = io();
+			
+			//register/sign in
+			
+			var signDiv = document.getElementById('signDiv');
+
+			var signDivUsername = document.getElementById('signDiv-username');
+			
+			var signDivSignIn = document.getElementById('signDiv-signIn');
+			
+			var signDivSignUp = document.getElementById('signDiv-signUp');
+			
+			var signDivPassword = document.getElementById('signDiv-password');
+			
+			signDivSignIn.onclick = function() {
+				socket.emit('signIn', {
+					username: signDivUsername.value,
+					password: signDivPassword.value
+				});
+			}
+			
+			signDivSignUp.onclick = function() {
+				socket.emit('signUp', {
+					username: signDivUsername.value,
+					password: signDivPassword.value
+				});
+			}
+			
+			socket.on('signInResponse', function(data) {
+				if (data.success) {
+					signDiv.style.display = 'none';
+					document.getElementById("gameDiv").style.display = "inline-block";
+				} else {
+					alert('Sign in unsuccessful.');
+				}
+			});
+			
+			socket.on('signUpResponse', function(data) {
+				if (data.success) {
+					alert('You have made an account!')
+				} else {
+					alert('Such user already exists.');
+				}
+			});
+			
+			
+			//game
 			var canv = document.getElementById('ctx').getContext("2d");
 			var chatText = document.getElementById('chat-text');
 			var chatInput = document.getElementById('chat-input');
@@ -130,6 +188,7 @@
 			}
 			
 			document.onmousemove = function(e) {
+				//Extract x and y relative to the middle of the screen.
 				var x = -250 + e.clientX - 8;
 				var y = -250 + e.clientY - 8;
 				var angle = Math.atan2(y, x) / Math.PI * 180;
