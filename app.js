@@ -2,8 +2,7 @@ var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
 
-var socketList = {};
-
+var socketList = {}; //List of all connected players
 
 app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/client/index.html');
@@ -15,9 +14,9 @@ serv.listen(2000); //port 2000
 
 console.log("Server started...");
 
-
 var Entity = function() {
-	var self = {
+
+	var self = { //constructor
 		x: 250,
 		y: 250,
 		speedX: 0,
@@ -25,13 +24,17 @@ var Entity = function() {
 		id: "",
 	}
 		
-	self.update = function() {
+	self.update = function() { 
 		self.updatePosition();
 	}
 	
 	self.updatePosition = function(){
 		self.x += self.speedX;
 		self.y += self.speedY;
+	}
+	
+	self.getDistance = function(pt) {
+		return Math.sqrt(Math.pow(self.x - pt.x, 2) + Math.pow(self.y - pt.y, 2));
 	}
 	
 	return self;
@@ -45,6 +48,8 @@ var Player = function(id) {
 	self.pressingLeft = false;
 	self.pressingRight = false;
 	self.pressingUp = false;
+	self.pressingAttck = false;
+	self.mouseAngle = 0; //degrees
 	self.maxSpeed = 10;
 	
 	var super_update = self.update;
@@ -52,7 +57,18 @@ var Player = function(id) {
 	self.update = function() {
 		self.updateSpeed();
 		super_update();
+		if (self.pressingAttck) {
+			self.shootBullet(self.mouseAngle);
+		}
+		
 	}
+	
+	self.shootBullet = function(angle) {
+		var bullet = Bullet(self.id, angle);		
+		bullet.x = self.x;
+		bullet.y = self.y;
+	}
+	
 
 	self.updateSpeed = function() {
 		if (self.pressingRight) {
@@ -97,6 +113,15 @@ Player.onConnect = function(socket) {
 		if (data.inputId === 'down') {
 			player.pressingDown = data.state;
 		}
+		
+		if (data.inputId === 'attack') {
+			player.pressingAttck = data.state;
+		}
+		
+		if (data.inputId === 'mouseAngle') {
+			player.mouseAngle = data.state;
+		}
+		
 	});
 }
 
@@ -106,9 +131,10 @@ Player.onDisconnect = function(socket){
 
 Player.update = function () {
 	
+	/*
 	if (Math.random() < 0.1) {
 		Bullet(Math.random() * 360);
-	}
+	}*/
 	
 	var pack = [];
 	
@@ -125,7 +151,7 @@ Player.update = function () {
 	return pack;
 }
 
-var Bullet = function (theta) {
+var Bullet = function (parent, theta) {
 	var self = Entity();
 	self.id = Math.random();
 	
@@ -134,13 +160,27 @@ var Bullet = function (theta) {
 	
 	self.timer = 0;
 	self.toRemove = false;
+	self.parent = parent;
+	
 	var super_update = self.update;
 	
+	
 	self.update = function(){
+		
 		if (self.timer++ > 100) {
 			self.toRemove = true;
 		}
+		
 		super_update();
+		
+		for (var i in Player.list) {
+			var p = Player.list[i];
+			if (self.getDistance(p) < 32 && self.parent !== p.id) {
+			//handle collision, ex: hp--;
+				self.toRemove = true;
+			}
+		}
+		
 	}
 	Bullet.list[self.id] = self;
 	return self;
@@ -152,13 +192,15 @@ Bullet.update = function () {
 	var pack = [];
 	
 	for (var i in Bullet.list) {
-		//Loops through each currently connected socket
 		var b = Bullet.list[i];
 		b.update();
-		pack.push({
-			x:b.x,
-			y:b.y
-		});
+		if (b.toRemove)
+			delete Bullet.list[i];
+		else 
+			pack.push({
+				x:b.x,
+				y:b.y
+			});
 	}
 	return pack;
 }
@@ -169,7 +211,7 @@ var DEBUG = false;
 var io = require('socket.io') (serv, {});
 
 io.sockets.on('connection', function(socket){
-	//Upon connection to the server, each socket is given unique properties.
+	//While the sockets are connected to the server
 	socket.id = Math.random();
 	socketList[socket.id] = socket;
 

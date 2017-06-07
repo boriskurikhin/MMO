@@ -115,6 +115,30 @@
 				}
 			}
 			
+			document.onmousedown = function(e) {
+				socket.emit('keyPress', {
+					inputId: 'attack',
+					state: true
+				});
+			}
+			
+			document.onmouseup = function(e) {
+				socket.emit('keyPress', {
+					inputId: 'attack',
+					state: false
+				});
+			}
+			
+			document.onmousemove = function(e) {
+				var x = -250 + e.clientX - 8;
+				var y = -250 + e.clientY - 8;
+				var angle = Math.atan2(y, x) / Math.PI * 180;
+				socket.emit('keyPress', {
+					inputId: 'mouseAngle',
+					state: angle
+				});
+			}
+			
 		</script>
 	</body>
 </html>
