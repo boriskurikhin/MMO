@@ -1,6 +1,6 @@
-# Project Title
+# Legend of Highland (An online browser-based MMO) - In Development
 
-Legend of Highland (An online browser-based MMO) - In Development
+A small in-browser 2d mmo made with JavaScript libraries. This is going to be my first big JavaScript project. As the game progresses, more information will be included here. As of right now, the game is in its' early development stages and is absolutely not ready for any testing.
 
 ## Releases
 
