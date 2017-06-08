@@ -115,7 +115,7 @@
 				
 				self.draw = function() {
 					var hpWidth = 30 * (self.hp / self.hpMax);
-					console.log(hpWidth + ' is hp width');
+					//console.log(hpWidth + ' is hp width');
 					canv.fillRect(self.x - hpWidth/2, self.y + 40, hpWidth, 4);
 					canv.fillText(self.score, self.x, self.y-40);
 					canv.fillText(self.number, self.x, self.y);
@@ -288,10 +288,10 @@
 			}
 			
 			document.onmousemove = function(e) {
-				//Extract x and y relative to the middle of the screen.
-				var x = -250 + e.clientX - 8;
-				var y = -250 + e.clientY - 8;
-				var angle = Math.atan2(y, x) / Math.PI * 180;
+				var x = Math.min(500, e.clientX) - 250;
+				var y = Math.min(500, e.clientY) - 250;
+				var angle = Math.atan2(y, x) * 180 / Math.PI;
+				//console.log(angle);
 				socket.emit('keyPress', {
 					inputId: 'mouseAngle',
 					state: angle
