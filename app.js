@@ -56,6 +56,9 @@ var Player = function(id) {
 	self.pressingAttck = false;
 	self.mouseAngle = 0; //degrees
 	self.maxSpeed = 10;
+	self.hp = 10;
+	self.hpMax = 10;
+	self.score = 0;
 	
 	var super_update = self.update;
 	
@@ -99,7 +102,10 @@ var Player = function(id) {
 			id: self.id,
 			x: self.x,
 			y: self.y,
-			number: self.number
+			number: self.number,
+			hp: self.hp,
+			hpMax: self.hpMax,
+			score: self.score
 		};
 	}
 	
@@ -107,7 +113,9 @@ var Player = function(id) {
 		return {
 			id: self.id,
 			x: self.x,
-			y: self.y
+			y: self.y,
+			hp: self.hp,
+			score: self.score
 		};
 	}
 	
@@ -215,7 +223,23 @@ var Bullet = function (parent, theta) {
 		for (var i in Player.list) {
 			var p = Player.list[i];
 			if (self.getDistance(p) < 32 && self.parent !== p.id) {
-			//handle collision, ex: hp--;
+				
+				p.hp--;
+				
+				if (p.hp <= 0 ) {
+					
+					var shooter = Player.list[self.parent];
+				
+					if (shooter) {
+						shooter.score += 1;	
+						p.score = Math.max(0, p.score - 1);
+					}
+					
+					p.hp = p.hpMax;
+					p.x = Math.random() * 500;
+					p.y = Math.random() * 500;
+				}
+				
 				self.toRemove = true;
 			}
 		}

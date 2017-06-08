@@ -108,8 +108,23 @@
 				self.number = initPack.number;
 				self.x = initPack.x;
 				self.y = initPack.y;
+				self.hp = initPack.hp;
+				self.hpMax = initPack.hpMax;
+				self.score = initPack.score;
+				
+				
+				self.draw = function() {
+					var hpWidth = 30 * (self.hp / self.hpMax);
+					console.log(hpWidth + ' is hp width');
+					canv.fillRect(self.x - hpWidth/2, self.y + 40, hpWidth, 4);
+					canv.fillText(self.score, self.x, self.y-40);
+					canv.fillText(self.number, self.x, self.y);
+				}
 				
 				Player.list[self.id] = self;
+				
+				
+				
 				return self;
 			}
 			
@@ -121,6 +136,11 @@
 				self.x = initPack.x;
 				self.y = initPack.y;
 				Bullet.list[self.id] = self;
+				
+				self.draw = function() {
+					canv.fillRect(self.x - 5, self.y -5, 10, 10);
+				}
+				
 				return self;
 			}
 			
@@ -150,6 +170,10 @@
 							p.x = pack.x;
 						if (pack.y !== undefined) 
 							p.y = pack.y
+						if (pack.hp !== undefined) 
+							p.hp = pack.hp;
+						if (pack.score !== undefined)
+							p.score = pack.score;
 					}
 				}
 				for (var i = 0; i < data.bullet.length; i++) {
@@ -182,23 +206,12 @@
 			setInterval(function() {
 				canv.clearRect(0, 0, 500, 500);
 				for (var i in Player.list) {
-					canv.fillText(Player.list[i].number, Player.list[i].x, Player.list[i].y);
+					Player.list[i].draw();
 				}
 				for (var i in Bullet.list) {
-					canv.fillRect(Bullet.list[i].x - 5, Bullet.list[i].y -5, 10, 10);
+					Bullet.list[i].draw();
 				}
 			}, 40);
-			
-			
-			socket.on('newPosition', function(data) {
-				canv.clearRect(0, 0, 500, 500);
-				for (var i = 0; i < data.player.length; i++) {
-					canv.fillText(data.player[i].number, data.player[i].x, data.player[i].y);
-				}
-				for (var i = 0; i < data.bullet.length; i++) {
-					canv.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 10, 10);
-				}
-			});
 					
 			document.onkeydown = function(e) {
 				if (e.keyCode === 68) { //d
