@@ -85,16 +85,6 @@
 			var chatInput = document.getElementById('chat-input');
 			var chatForm = document.getElementById('chat-form');
 			
-			socket.on('newPosition', function(data) {
-				canv.clearRect(0, 0, 500, 500);
-				for (var i = 0; i < data.player.length; i++) {
-					canv.fillText(data.player[i].number, data.player[i].x, data.player[i].y);
-				}
-				for (var i = 0; i < data.bullet.length; i++) {
-					canv.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 10, 10);
-				}
-			});
-			
 			socket.on('addToChat', function(data) {
 				chatText.innerHTML += '<div><p>' + data + '</p></div>';
 			});
@@ -112,7 +102,104 @@
 				chatInput.value = '';
 			}
 			
+			var Player = function(initPack) {
+				var self = {};
+				self.id = initPack.id;
+				self.number = initPack.number;
+				self.x = initPack.x;
+				self.y = initPack.y;
+				
+				Player.list[self.id] = self;
+				return self;
+			}
 			
+			Player.list = {};
+			
+			var Bullet = function(initPack) {
+				var self = {};
+				self.id = initPack.id;
+				self.x = initPack.x;
+				self.y = initPack.y;
+				Bullet.list[self.id] = self;
+				return self;
+			}
+			
+			Bullet.list = {};
+			
+			
+			//init - when new things are created, the package will contain all data
+			
+			socket.on('init', function(data) {
+				for (var i = 0; i < data.player.length; i++) {
+					new Player(data.player[i]);
+				}
+				for (var i = 0; i < data.bullet.length; i++) {
+					new Bullet(data.bullet[i]);
+				}
+			});
+			
+			
+			//update - difference between old package and new update
+			
+			socket.on('update', function(data) {
+				for (var i = 0; i < data.player.length; i++) {
+					var pack = data.player[i];
+					var p = Player.list[pack.id];
+					if (p) {
+						if (pack.x !== undefined)
+							p.x = pack.x;
+						if (pack.y !== undefined) 
+							p.y = pack.y
+					}
+				}
+				for (var i = 0; i < data.bullet.length; i++) {
+					var pack = data.bullet[i];
+					var b = Bullet.list[data.bullet[i].id];
+					if (b) {
+						if (pack.x !== undefined)
+							b.x = pack.x;
+						if (pack.y !== undefined)
+							b.y = pack.y;
+					} 
+				}
+			});
+			
+			
+			//remove - notifies client when a player was removed
+			
+			socket.on('remove', function(data) {
+				for (var i = 0; i < data.player.length; i++) {
+					delete Player.list[data.player[i]];
+				}
+				
+				for (var i = 0; i < data.bullet.length; i++) {
+					delete Bullet.list[data.bullet[i]];
+				}
+			});
+			
+			//draw to screen
+			
+			setInterval(function() {
+				canv.clearRect(0, 0, 500, 500);
+				for (var i in Player.list) {
+					canv.fillText(Player.list[i].number, Player.list[i].x, Player.list[i].y);
+				}
+				for (var i in Bullet.list) {
+					canv.fillRect(Bullet.list[i].x - 5, Bullet.list[i].y -5, 10, 10);
+				}
+			}, 40);
+			
+			
+			socket.on('newPosition', function(data) {
+				canv.clearRect(0, 0, 500, 500);
+				for (var i = 0; i < data.player.length; i++) {
+					canv.fillText(data.player[i].number, data.player[i].x, data.player[i].y);
+				}
+				for (var i = 0; i < data.bullet.length; i++) {
+					canv.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 10, 10);
+				}
+			});
+					
 			document.onkeydown = function(e) {
 				if (e.keyCode === 68) { //d
 					socket.emit('keyPress', {

@@ -1,3 +1,8 @@
+var mongojs = require('mongojs');
+var db = mongojs('localhost:27017/myGame', ['account', 'progress']);
+
+db.account.insert({username: "boris", password:"asd"});
+
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
@@ -88,14 +93,38 @@ var Player = function(id) {
 		}
 	}
 	
+	
+	self.getInitPack = function() {
+		return {
+			id: self.id,
+			x: self.x,
+			y: self.y,
+			number: self.number
+		};
+	}
+	
+	self.getUpdatePack = function() {
+		return {
+			id: self.id,
+			x: self.x,
+			y: self.y
+		};
+	}
+	
+	
 	Player.list[id] = self;
+	
+	initPack.player.push(self.getInitPack());
+	
 	return self; 
 }
 
 Player.list = {};
 
 Player.onConnect = function(socket) {
+	//when a player connects to the server
 	var player = Player(socket.id);
+	
 	socket.on('keyPress', function(data) {
 		
 		if (data.inputId === 'left') {
@@ -123,10 +152,24 @@ Player.onConnect = function(socket) {
 		}
 		
 	});
+	
+	socket.emit('init', {
+		player: Player.getAllInitPack(), 
+		bullet: Bullet.getAllInitPack()
+	})
+}
+
+Player.getAllInitPack = function() {
+	var players = [];
+	for (var i in Player.list) {
+		players.push(Player.list[i].getInitPack());
+	}
+	return players;
 }
 
 Player.onDisconnect = function(socket){
 	delete Player.list[socket.id];
+	removePack.player.push(socket.id);
 }
 
 Player.update = function () {
@@ -142,11 +185,7 @@ Player.update = function () {
 		//Loops through each currently connected socket
 		var player = Player.list[i];
 		player.update();
-		pack.push({
-			x:player.x,
-			y:player.y,
-			number:player.number
-		});
+		pack.push(player.getUpdatePack());
 	}
 	return pack;
 }
@@ -182,11 +221,39 @@ var Bullet = function (parent, theta) {
 		}
 		
 	}
+	
 	Bullet.list[self.id] = self;
+	
+	self.getInitPack = function() {
+		return {
+			id: self.id,
+			x: self.x,
+			y: self.y
+		};
+	}
+	
+	self.getUpdatePack = function() {
+		return {
+			id: self.id,
+			x: self.x,
+			y: self.y
+		};
+	}
+	
+	initPack.bullet.push(self.getInitPack());
+	
 	return self;
 }
 
 Bullet.list = {};
+
+Bullet.getAllInitPack = function() {
+	var bullets = [];
+	for (var i in Bullet.list) {
+		bullets.push(Bullet.list[i].getInitPack());
+	}
+	return bullets;
+}
 
 Bullet.update = function () {
 	var pack = [];
@@ -194,13 +261,12 @@ Bullet.update = function () {
 	for (var i in Bullet.list) {
 		var b = Bullet.list[i];
 		b.update();
-		if (b.toRemove)
+		if (b.toRemove) {
 			delete Bullet.list[i];
+			removePack.bullet.push(b.id);
+		}
 		else 
-			pack.push({
-				x:b.x,
-				y:b.y
-			});
+			pack.push(b.getUpdatePack());
 	}
 	return pack;
 }
@@ -213,22 +279,30 @@ var USERS = {
 }
 
 var isValidPassword = function(data, cb){
-	setTimeout(function() {
-			cb(USERS[data.username] === data.password);
-	}, 10);
+	db.account.find({ username: data.username, password: data.password}, function(err, res) 
+	{
+		if (res.length > 0)
+			cb(true);
+		else
+			cb(false);
+	});
 }
 
 var isUsernameTaken = function(data, cb) {
-	setTimeout(function() {
-		cb(USERS[data.username]);
-	}, 10);
+	db.account.find({username: data.username}, function(err, res) 
+	{
+		if (res.length > 0)
+			cb(true);
+		else
+			cb(false);
+	});
 }
 
 var addUser = function(data, cb){
-	setTimeout(function() {
-		USERS[data.username] = data.password;
+	db.account.insert({ username: data.username, password: data.password}, function(err) 
+	{
 		cb();
-	}, 10);
+	});
 }
 
 var io = require('socket.io') (serv, {});
@@ -295,6 +369,9 @@ io.sockets.on('connection', function(socket){
 	
 });
 
+var initPack = {player:[], bullet: []};
+var removePack = {player:[], bullet: []};
+
 setInterval(function(){
 	//Server update function
 	
@@ -306,8 +383,17 @@ setInterval(function(){
 	for (var i in socketList) {
 		//Sends clients back the updated information
 		var socket = socketList[i];
-		socket.emit('newPosition', pack);
+		socket.emit('init', initPack);
+		
+		socket.emit('update', pack);
+		
+		socket.emit('remove', removePack);
 	}
+	
+	initPack.player = [];
+	initPack.bullet = [];
+	removePack.player = [];
+	removePack.bullet = [];
 	
 }, 1000/25.0 /*25 frames/second*/);
 
