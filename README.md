@@ -10,6 +10,7 @@ No working beta is out yet.
 
 * [Node.js](https://nodejs.org/en/) - Server stuff
 * [Socket.IO](https://socket.io/) - Communication between client and server
+* [MongoDB](https://www.mongodb.com/) - Database handling
 
 ## Authors
 
