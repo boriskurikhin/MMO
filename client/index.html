@@ -102,6 +102,15 @@
 				chatInput.value = '';
 			}
 			
+			var Img = {};
+			Img.player = new Image();
+			Img.player.src = '/client/img/player.png';
+			Img.bullet = new Image();
+			Img.bullet.src = '/client/img/bullet.png';
+			Img.map = new Image();
+			Img.map.src = '/client/img/map.png';
+			
+			
 			var Player = function(initPack) {
 				var self = {};
 				self.id = initPack.id;
@@ -116,9 +125,22 @@
 				self.draw = function() {
 					var hpWidth = 30 * (self.hp / self.hpMax);
 					//console.log(hpWidth + ' is hp width');
+					
+					
+					canv.fillStyle = 'red';
 					canv.fillRect(self.x - hpWidth/2, self.y + 40, hpWidth, 4);
-					canv.fillText(self.score, self.x, self.y-40);
-					canv.fillText(self.number, self.x, self.y);
+					
+					var width = Img.player.width * 2;
+					var height = Img.player.height * 2;
+					
+					canv.drawImage(Img.player, 0, 0, Img.player.width, 
+								 Img.player.height, self.x - width/2,
+								  self.y - height/2, width, height);
+					
+					
+					//canv.fillText(self.score, self.x, self.y-40);
+					
+					//canv.fillText(self.number, self.x, self.y);
 				}
 				
 				Player.list[self.id] = self;
@@ -138,7 +160,15 @@
 				Bullet.list[self.id] = self;
 				
 				self.draw = function() {
-					canv.fillRect(self.x - 5, self.y -5, 10, 10);
+					var width = Img.bullet.width / 2;
+					var height = Img.bullet.height / 2;
+					
+					canv.drawImage(Img.bullet,
+								 0, 0, Img.bullet.width, Img.bullet.height,
+								 self.x - width/2, self.y-height/2, width, height);
+					
+					
+				
 				}
 				
 				return self;
@@ -149,7 +179,12 @@
 			
 			//init - when new things are created, the package will contain all data
 			
+			var selfId = null;
+			
 			socket.on('init', function(data) {
+				if (data.selfId) {
+					selfId = data.selfId;
+				}
 				for (var i = 0; i < data.player.length; i++) {
 					new Player(data.player[i]);
 				}
@@ -205,6 +240,10 @@
 			
 			setInterval(function() {
 				canv.clearRect(0, 0, 500, 500);
+				
+				drawMap();
+				drawScore();
+				
 				for (var i in Player.list) {
 					Player.list[i].draw();
 				}
@@ -212,6 +251,17 @@
 					Bullet.list[i].draw();
 				}
 			}, 40);
+			
+			var drawMap = function() {
+				canv.drawImage(Img.map, 0, 0);
+			}
+			
+			var drawScore = function(){
+				canv.fillStyle = 'white';
+				canv.fillText(Player.list[selfId].score,
+							 0, 30);
+			}
+			
 					
 			document.onkeydown = function(e) {
 				if (e.keyCode === 68) { //d
@@ -288,9 +338,20 @@
 			}
 			
 			document.onmousemove = function(e) {
-				var x = e.clientX - 250 - 5
-				var y = e.clientY - 250 - 5;
-				var angle = Math.atan2(y, x) * 180 / Math.PI;
+						
+				var x = e.clientX - Player.list[selfId].x - 5
+				var y = e.clientY - Player.list[selfId].y - 5;
+				
+				var angle = Math.atan2(y, x);
+				
+				console.log(angle);
+				
+				//if (angle > 0) {
+					//angle += Math.PI;
+			//}
+				
+				angle = angle * 180 / Math.PI;
+				
 				//console.log(angle);
 				socket.emit('keyPress', {
 					inputId: 'mouseAngle',
