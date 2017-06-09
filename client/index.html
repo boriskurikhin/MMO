@@ -288,8 +288,8 @@
 			}
 			
 			document.onmousemove = function(e) {
-				var x = Math.min(500, e.clientX) - 250;
-				var y = Math.min(500, e.clientY) - 250;
+				var x = e.clientX - 250 - 5
+				var y = e.clientY - 250 - 5;
 				var angle = Math.atan2(y, x) * 180 / Math.PI;
 				//console.log(angle);
 				socket.emit('keyPress', {
