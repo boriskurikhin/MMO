@@ -294,11 +294,15 @@
 			}, 40);
 			
 			var timer = false;
-			var timer_time = 1000;
+			var counter = 2;
 			
-			setInterval(function(){
-				timer ^= 1;
-			}, timer_time);
+			setInterval(function() {
+				counter--;
+				if (counter == 0) {
+					timer = true;
+					counter = 2;
+				}
+			}, 500);
 			
 			var drawMap = function() {
 				
