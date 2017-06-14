@@ -294,11 +294,11 @@
 			}, 40);
 			
 			var timer = false;
+			var timer_time = 1000;
 			
 			setInterval(function(){
-				if (!timer) timer = true;
-				else if (timer) timer = false;
-			}, 1000);
+				timer ^= 1;
+			}, timer_time);
 			
 			var drawMap = function() {
 				
@@ -381,6 +381,8 @@
 						inputId: 'attack',
 						state: true
 					});
+					timer = false;
+					timer_time = 1000;
 				}
 			}
 			
