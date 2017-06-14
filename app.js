@@ -2,8 +2,6 @@
 var db = null;
 //mongojs('localhost:27017/myGame', ['account', 'progress']);
 
-//db.account.insert({username: "boris", password:"asd"});
-
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
@@ -424,6 +422,6 @@ setInterval(function(){
 	removePack.player = [];
 	removePack.bullet = [];
 	
-}, 1000/25.0 /*25 frames/second*/);
+}, 1000/30.0 /*25 frames/second*/);
 
 

@@ -293,6 +293,13 @@
 				}
 			}, 40);
 			
+			var timer = false;
+			
+			setInterval(function(){
+				if (!timer) timer = true;
+				else if (timer) timer = false;
+			}, 1000);
+			
 			var drawMap = function() {
 				
 				var x = WIDTH / 2 - Player.list[selfId].x;
@@ -369,10 +376,12 @@
 			}
 			
 			document.onmousedown = function(e) {
-				socket.emit('keyPress', {
-					inputId: 'attack',
-					state: true
-				});
+				if (timer) {
+					socket.emit('keyPress', {
+						inputId: 'attack',
+						state: true
+					});
+				}
 			}
 			
 			document.onmouseup = function(e) {
