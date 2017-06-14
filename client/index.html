@@ -4,6 +4,8 @@
 	<head>
 		<title>PvP MMO</title>
 		<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+		<script src="arudino/arduino.js"></script>
+		<script src="arudino/serial.js"></script>
 	</head>
 
 	<body>
@@ -32,8 +34,26 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.2/socket.io.js"></script>
 		
 		<script>
+			/* Arduino Controller Stuff
+			
+			var port = 'COM4';
+			
+			if (Connect(port, 57600)) {
+				console.log("Connected");
+			} else {
+				console.log("not connected");
+			}
+			*/
+			
+			
+		</script>
+		
+		<script>
 			
 			var socket = io();
+			
+			var WIDTH = 500;
+			var HEIGHT = 500;
 			
 			//register/sign in
 			
@@ -109,7 +129,7 @@
 			Img.bullet.src = '/client/img/bullet.png';
 			Img.map = new Image();
 			Img.map.src = '/client/img/map.png';
-			
+
 			
 			var Player = function(initPack) {
 				var self = {};
@@ -123,19 +143,24 @@
 				
 				
 				self.draw = function() {
+										
+					var x = self.x - Player.list[selfId].x + WIDTH / 2;
+					var y = self.y - Player.list[selfId].y + HEIGHT / 2;
+					
 					var hpWidth = 30 * (self.hp / self.hpMax);
 					//console.log(hpWidth + ' is hp width');
 					
 					
 					canv.fillStyle = 'red';
-					canv.fillRect(self.x - hpWidth/2, self.y + 40, hpWidth, 4);
+					canv.fillRect(x - hpWidth/2, y + 40, hpWidth, 4);
 					
 					var width = Img.player.width * 2;
 					var height = Img.player.height * 2;
 					
+					
 					canv.drawImage(Img.player, 0, 0, Img.player.width, 
-								 Img.player.height, self.x - width/2,
-								  self.y - height/2, width, height);
+								 Img.player.height, x - width/2,
+								  y - height/2, width, height);
 					
 					
 					//canv.fillText(self.score, self.x, self.y-40);
@@ -153,6 +178,7 @@
 			Player.list = {};
 			
 			var Bullet = function(initPack) {
+				
 				var self = {};
 				self.id = initPack.id;
 				self.x = initPack.x;
@@ -160,12 +186,17 @@
 				Bullet.list[self.id] = self;
 				
 				self.draw = function() {
-					var width = Img.bullet.width / 2;
-					var height = Img.bullet.height / 2;
+				var width = Img.bullet.width / 2;
+				var height = Img.bullet.height / 2;
+					
+				var x = self.x - Player.list[selfId].x + WIDTH / 2;
+				var y = self.y - Player.list[selfId].y + HEIGHT / 2;
+					
+					
 					
 					canv.drawImage(Img.bullet,
 								 0, 0, Img.bullet.width, Img.bullet.height,
-								 self.x - width/2, self.y-height/2, width, height);
+								 x - width/2, y-height/2, width, height);
 					
 					
 				
@@ -239,6 +270,11 @@
 			//draw to screen
 			
 			setInterval(function() {
+
+				if (!selfId) {
+					return;
+				}
+				
 				canv.clearRect(0, 0, 500, 500);
 				
 				drawMap();
@@ -253,7 +289,11 @@
 			}, 40);
 			
 			var drawMap = function() {
-				canv.drawImage(Img.map, 0, 0);
+				
+				var x = WIDTH / 2 - Player.list[selfId].x;
+				var y = HEIGHT / 2 - Player.list[selfId].y;
+				
+				canv.drawImage(Img.map, x, y);
 			}
 			
 			var drawScore = function(){
@@ -338,13 +378,16 @@
 			}
 			
 			document.onmousemove = function(e) {
+				
+				if (!selfId) 
+					return;
 						
 				var x = e.clientX - Player.list[selfId].x - 5
 				var y = e.clientY - Player.list[selfId].y - 5;
 				
 				var angle = Math.atan2(y, x);
 				
-				console.log(angle);
+				//console.log(angle);
 				
 				//if (angle > 0) {
 					//angle += Math.PI;
