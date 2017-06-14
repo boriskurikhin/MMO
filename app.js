@@ -2,7 +2,7 @@
 var db = null;
 //mongojs('localhost:27017/myGame', ['account', 'progress']);
 
-db.account.insert({username: "boris", password:"asd"});
+//db.account.insert({username: "boris", password:"asd"});
 
 var express = require('express');
 var app = express();
