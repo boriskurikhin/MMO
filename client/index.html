@@ -6,14 +6,19 @@
 		<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 		<script src="arudino/arduino.js"></script>
 		<script src="arudino/serial.js"></script>
+		<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+		<link rel = "stylesheet" type="text/css" href="css/style.css">
 	</head>
 
 	<body>
-		<div id="signDiv">
-			Username: <input id="signDiv-username" type="text"/><br>
-			Password: <input id="signDiv-password" type="password"/><br>
-			<button id="signDiv-signIn">Sign In</button>
-			<button id="signDiv-signUp">Sign Up</button>
+		<div id="signDiv">	
+			<img src="img/bg.jpg" alt="Welcome to Legend of Hightlands!">
+			<div class="container">
+				 Username: <input id="signDiv-username" type="text"/><br>
+				 Password: <input id="signDiv-password" type="password"/><br>
+				<button id="signDiv-signIn">Sign In</button>
+				<button id="signDiv-signUp">Sign Up</button>
+			</div>
 		</div>
 		
 		<div id="gameDiv" style="display:none">
