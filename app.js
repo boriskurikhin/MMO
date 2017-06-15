@@ -128,7 +128,6 @@ var Player = function(id) {
 }
 
 Player.list = {};
-Mob.list = {};
 
 Player.onConnect = function(socket) {
 	//when a player connects to the server
@@ -407,7 +406,6 @@ setInterval(function(){
 	var pack = {
 		player: Player.update(),
 		bullet: Bullet.update(),
-		mob: Mob.update()
 	}
 	
 	for (var i in socketList) {

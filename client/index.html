@@ -11,7 +11,23 @@
 	</head>
 
 	<body>
-		<div id="signDiv">	
+		
+		
+		<div id="gameDiv" style="display:none" >
+			<canvas id="ctx" width="500" height="500" style=" border:1px solid #000000;position: absolute; left: 8px; top:8px;"></canvas>
+			<canvas id="ctx-ui" width="500" height="500" style="position: absolute; left: 8px; top:8px;"></canvas>
+			
+			<div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll; position: absolute; top: 508px;">
+				<div>
+					<p>Welcome to the chat!</p>
+				</div>
+			</div>
+			<form id="chat-form" style="position: absolute; top:608px;">
+				<input id="chat-input" type="text" style="width:500px;"/>
+			</form>
+		</div>
+		
+		<div id="signDiv" style="">	
 			<img src="/client/img/bg.jpg" alt="Welcome to Legend of Hightlands!">
 			<div class="container">
 				 Username: <input id="signDiv-username" type="text"/><br>
@@ -21,22 +37,7 @@
 			</div>
 		</div>
 		
-		<div id="gameDiv" style="display:none">
-			<canvas id="ctx" width="500" height="500" style="border:1px solid #000000"></canvas>
-
-			<div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll;">
-				<div>
-					<p>Hello!</p>
-				</div>
-			</div>
-			<form id="chat-form">
-				<input id="chat-input" type="text" style="width:500px;"/>
-			</form>
-		</div>
-		
-		
-		
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.2/socket.io.js"></script>
+		<script src="/client/js/socket.js" type="text/javascript"></script>
 		
 		<script>
 			/* Arduino Controller Stuff
@@ -112,9 +113,12 @@
 			
 			//game
 			var canv = document.getElementById('ctx').getContext("2d");
+			var canvUi = document.getElementById('ctx-ui').getContext('2d');
 			var chatText = document.getElementById('chat-text');
 			var chatInput = document.getElementById('chat-input');
 			var chatForm = document.getElementById('chat-form');
+			
+			canvUi.font = '30px Lato sans-serif';
 			
 			socket.on('addToChat', function(data) {
 				chatText.innerHTML += '<div><p>' + data + '</p></div>';
@@ -142,7 +146,39 @@
 			Img.map.src = '/client/img/map.png';
 			
 			
-			var Player = function(initPack) {
+
+			
+			var Bullet = function(initPack) {
+				
+				var self = {};
+				self.id = initPack.id;
+				self.x = initPack.x;
+				self.y = initPack.y;
+				Bullet.list[self.id] = self;
+				
+				self.draw = function() {
+				var width = Img.bullet.width / 2;
+				var height = Img.bullet.height / 2;
+					
+				var x = self.x - Player.list[selfId].x + WIDTH / 2;
+				var y = self.y - Player.list[selfId].y + HEIGHT / 2;
+					
+					
+					
+					canv.drawImage(Img.bullet,
+								 0, 0, Img.bullet.width, Img.bullet.height,
+								 x - width/2, y-height/2, width, height);
+					
+					
+				
+				}
+				
+				return self;
+			}
+			
+			Bullet.list = {};
+			
+						var Player = function(initPack) {
 				var self = {};
 				self.id = initPack.id;
 				self.number = initPack.number;
@@ -187,36 +223,6 @@
 			}
 			
 			Player.list = {};
-			
-			var Bullet = function(initPack) {
-				
-				var self = {};
-				self.id = initPack.id;
-				self.x = initPack.x;
-				self.y = initPack.y;
-				Bullet.list[self.id] = self;
-				
-				self.draw = function() {
-				var width = Img.bullet.width / 2;
-				var height = Img.bullet.height / 2;
-					
-				var x = self.x - Player.list[selfId].x + WIDTH / 2;
-				var y = self.y - Player.list[selfId].y + HEIGHT / 2;
-					
-					
-					
-					canv.drawImage(Img.bullet,
-								 0, 0, Img.bullet.width, Img.bullet.height,
-								 x - width/2, y-height/2, width, height);
-					
-					
-				
-				}
-				
-				return self;
-			}
-			
-			Bullet.list = {};
 			
 			
 			//init - when new things are created, the package will contain all data
@@ -263,7 +269,7 @@
 							b.y = pack.y;
 					} 
 				}
-
+				
 			});
 			
 			
@@ -300,17 +306,6 @@
 				}
 			}, 40);
 			
-			var timer = false;
-			var counter = 2;
-			
-			setInterval(function() {
-				counter--;
-				if (counter == 0) {
-					timer = true;
-					counter = 2;
-				}
-			}, 500);
-			
 			var drawMap = function() {
 				
 				var x = WIDTH / 2 - Player.list[selfId].x;
@@ -319,9 +314,15 @@
 				canv.drawImage(Img.map, x, y);
 			}
 			
-			var drawScore = function(){
-				canv.fillStyle = 'white';
-				canv.fillText(Player.list[selfId].score,
+			var lastScore = null;
+			
+			var drawScore = function() {
+				if (lastScore === Player.list[selfId].score)
+					return;
+				lastScore = Player.list[selfId].score;
+				canvUi.clearRect(0, 0, 500, 500);
+				canvUi.fillStyle = 'white';
+				canvUi.fillText(Player.list[selfId].score,
 							 0, 30);
 			}
 			
@@ -404,15 +405,13 @@
 			}
 			
 			document.onmousedown = function(e) {
-				if (timer) {
+				
 					socket.emit('keyPress', {
 						inputId: 'attack',
 						state: true
 					});
-					timer = false;
-					timer_time = 1000;
 				}
-			}
+			
 			
 			document.onmouseup = function(e) {
 				socket.emit('keyPress', {
