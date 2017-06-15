@@ -406,6 +406,9 @@
 			
 			document.onmousedown = function(e) {
 				
+				if (e.clientX > 500 || e.clientY > 500)
+					return;
+				
 					socket.emit('keyPress', {
 						inputId: 'attack',
 						state: true
@@ -414,6 +417,10 @@
 			
 			
 			document.onmouseup = function(e) {
+				
+				if (e.clientX > 500 || e.clientY > 500)
+					return;
+				
 				socket.emit('keyPress', {
 					inputId: 'attack',
 					state: false
@@ -424,7 +431,7 @@
 				
 				if (!selfId) 
 					return;
-						
+				
 				var x = e.clientX - 255
 				var y = e.clientY - 255;
 				
