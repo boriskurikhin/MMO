@@ -5,7 +5,7 @@
   "dependencies": {
 	  "express": "^4.15.3",
 	  "socket.io": "^2.0.2",
-	  "mongojs": "^3.3.x"
+	  "mongojs": "^2.4.0"
   },
   "engines": {
 	  "node": "4.1.x"
