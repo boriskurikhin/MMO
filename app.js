@@ -5,6 +5,7 @@ var db = null;
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
+var SerialPort = require('serialPort');
 
 var socketList = {}; //List of all connected players
 
