@@ -1,6 +1,5 @@
-//var mongojs = require('mongojs');
-var db = null;
-//mongojs('localhost:27017/myGame', ['account', 'progress']);
+var mongojs = require('mongojs');
+var db = mongojs('mongodb://admin:admin@ds123312.mlab.com:23312/game', ['account']);
 
 var express = require('express');
 var app = express();
@@ -304,33 +303,33 @@ var USERS = {
 }
 
 var isValidPassword = function(data, cb){
-	return cb(true);
-	/*db.account.find({ username: data.username, password: data.password}, function(err, res) 
+	//return cb(true);
+	db.account.find({ username: data.username, password: data.password}, function(err, res) 
 	{
 		if (res.length > 0)
 			cb(true);
 		else
 			cb(false);
-	});*/
+	});
 }
 
 var isUsernameTaken = function(data, cb) {
-	return cb(false);
-	/*db.account.find({username: data.username}, function(err, res) 
+	//return cb(false);
+	db.account.find({username: data.username}, function(err, res) 
 	{
 		if (res.length > 0)
 			cb(true);
 		else
 			cb(false);
-	});*/
+	});
 }
 
 var addUser = function(data, cb){
-	return cb();
-	/*db.account.insert({ username: data.username, password: data.password}, function(err) 
+	//return cb();
+	db.account.insert({ username: data.username, password: data.password}, function(err) 
 	{
 		cb();
-	});*/
+	});
 }
 
 var io = require('socket.io') (serv, {});
