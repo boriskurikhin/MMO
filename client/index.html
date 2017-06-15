@@ -140,9 +140,7 @@
 			Img.bullet.src = '/client/img/mageshot1.png';
 			Img.map = new Image();
 			Img.map.src = '/client/img/map.png';
-			Img.mob = new Image();
-			Img.mob.src = '/client/img/player.png';
-
+			
 			
 			var Player = function(initPack) {
 				var self = {};
@@ -188,53 +186,7 @@
 				return self;
 			}
 			
-			var Mob = function(initPack) {
-				var self = {};
-				self.id = initPack.id;
-				self.x = initPack.x;
-				self.y = initPack.y;
-				self.hp = initPack.hp;
-				self.hpMax = initPack.hpMax;
-				self.pk = initPack.pk;
-				
-				
-				self.draw = function() {
-										
-					var x = self.x - Mob.list[selfId].x + WIDTH / 2;
-					var y = self.y - Mob.list[selfId].y + HEIGHT / 2;
-					
-					var hpWidth = 30 * (self.hp / self.hpMax);
-					//console.log(hpWidth + ' is hp width');
-					
-					
-					canv.fillStyle = 'green';
-					canv.fillRect(x - hpWidth/2, y + 40, hpWidth, 4);
-					
-					var width = 100;
-					var height = 100;
-					
-					
-					canv.drawImage(Img.mob, 0, 0, Img.mob.width, 
-								 Img.player.mob, x - width/2,
-								  y - height/2, width, height);
-					
-					
-					//canv.fillText(self.score, self.x, self.y-40);
-					
-					//canv.fillText(self.number, self.x, self.y);
-				}
-				
-				Mob.list[self.id] = self;
-				
-				
-				
-				return self;
-			}
-			
-			
-			
 			Player.list = {};
-			Mob.list = {};
 			
 			var Bullet = function(initPack) {
 				
