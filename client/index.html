@@ -23,7 +23,7 @@
 				</div>
 			</div>
 			<form id="chat-form" style="position: absolute; top:608px;">
-				<input id="chat-input" type="text" style="width:500px;"/>
+				<input id="chat-input" type="text" style="width:500px;" onfocus="focus=1" onblur="focus=0"/>
 			</form>
 		</div>
 		
@@ -345,6 +345,10 @@
 			*/
 					
 			document.onkeydown = function(e) {
+				if (chatInput.focus===1) {
+					return;
+				}
+				
 				if (e.keyCode === 68) { //d
 					socket.emit('keyPress', {
 						inputId: 'right',
