@@ -45,6 +45,60 @@ var Entity = function() {
 	return self;
 }
 
+var Mob = function(id) {
+	var self = Entity();
+	self.id = id;
+	
+	self.maxSpeed = 20;
+	self.hp = 20;
+	self.hpMx = 20;
+	self.pk = 0;
+	
+	var super_update = self.update;
+	
+	self.update = function() {
+		self.updateSpeed();
+		super_update();
+		
+		if (Math.random() * 100 < 10) {
+			self.shootBullet(Math.random() * 360);
+		}
+	}
+	
+	self.shootBullet = function(angle) {
+		var bullet = Bullet(self.id, angle);		
+		bullet.x = self.x;
+		bullet.y = self.y;
+	}
+	
+	self.updateSpeed = function() {
+		self.speedX = 0;
+		self.speedY = 0;
+	}
+	
+	self.getInitPack = function() {
+		return {
+			id: self.id,
+			x: self.x,
+			y: self.y,
+			hp: self.hp,
+			pk: self.pk
+		};
+	}
+	
+	self.getUpdatePack = function() {
+		return {
+			x: self.x,
+			y: self.y,
+			hp: self.hp,
+			score: self.score
+		};
+	}
+	
+	Mob.list[id] = self;
+	
+}
+
 var Player = function(id) {
 	var self = Entity();
 	self.id = id;
@@ -128,6 +182,7 @@ var Player = function(id) {
 }
 
 Player.list = {};
+Mob.list = {};
 
 Player.onConnect = function(socket) {
 	//when a player connects to the server
@@ -179,6 +234,16 @@ Player.getAllInitPack = function() {
 Player.onDisconnect = function(socket){
 	delete Player.list[socket.id];
 	removePack.player.push(socket.id);
+}
+
+Mob.update = function() {
+	var pack = [];
+	for (var i in Mob.list) {
+		var mob = Mob.list[i];
+		mob.update();
+		pack.push(mob.getUpdatePack());
+	}
+	return pack;
 }
 
 Player.update = function () {
@@ -405,7 +470,8 @@ setInterval(function(){
 	
 	var pack = {
 		player: Player.update(),
-		bullet: Bullet.update()
+		bullet: Bullet.update(),
+		mob: Mob.update()
 	}
 	
 	for (var i in socketList) {
