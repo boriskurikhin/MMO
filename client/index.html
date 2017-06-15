@@ -57,6 +57,12 @@
 			
 			var socket = io();
 			
+			var SerialPort = require('serialPort');
+			
+			var port = new SerialPort('/dev/tty-usbserial1', {
+				baudRate: 57600
+			});
+			
 			var WIDTH = 500;
 			var HEIGHT = 500;
 			
@@ -317,6 +323,23 @@
 				canv.fillText(Player.list[selfId].score,
 							 0, 30);
 			}
+			
+			//Arduino port reading
+			
+			port.on('open', function(){
+				port.write('turn on', function(err) {
+					if (err) {
+						return console.log("error on write, " + err.message);
+					}
+					console.log("message written");
+				});
+			});
+			
+			port.on('error', function(err) {
+				if (err)
+					console.log("just error in general " + err.message);
+				console.log("message written");
+			});
 			
 					
 			document.onkeydown = function(e) {
