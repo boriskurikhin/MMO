@@ -87,10 +87,13 @@
 			}
 			
 			signDivSignUp.onclick = function() {
-				socket.emit('signUp', {
-					username: signDivUsername.value.replace(/<(?:.|\n)*?>/gm),
-					password: signDivPassword.value
-				});
+				var _user = signDivUsername.value.replace(/<(?:.|\n)*?>/gm, '');
+				if (_user && _user.length > 4 && _user.length < 11) {
+					socket.emit('signUp', {
+						username: _user,
+						password: signDivPassword.value
+					});
+				}
 			}
 			
 			socket.on('signInResponse', function(data) {
