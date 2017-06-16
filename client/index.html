@@ -88,7 +88,7 @@
 			
 			signDivSignUp.onclick = function() {
 				socket.emit('signUp', {
-					username: signDivUsername.value,
+					username: signDivUsername.value.replace(/<(?:.|\n)*?>/gm),
 					password: signDivPassword.value
 				});
 			}
@@ -133,7 +133,7 @@
 				if (chatInput.value[0] === '/')
 					socket.emit('evalServer', chatInput.value.slice(1));
 				else
-					socket.emit('sendMsgToServer', chatInput.value);
+					socket.emit('sendMsgToServer', chatInput.value.replace(/<(?:.|\n)*?>/gm, ''));
 				chatInput.value = '';
 			}
 			
