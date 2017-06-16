@@ -14,7 +14,8 @@ No working beta is out yet.
 
 ## Authors
 
-* **Boris Skurikhin** - *Initial work*
+* **Boris Skurikhin** - *Front/Back End & Inital Work*
+* **Octavian Gherghe** - *Graphic Design*
 
 Major shout out to [RainingChain](https://www.youtube.com/channel/UC8Yp-YagXZ4C5vOduEhcjRw) for his YouTube tutorials!
 
