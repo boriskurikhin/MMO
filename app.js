@@ -432,7 +432,7 @@ io.sockets.on('connection', function(socket){
 var initPack = {player:[], bullet: [], potion: []};
 var removePack = {player:[], bullet: [], potion: []};
 
-Potion.list[0] = new Potion(Math.random() * 500, Math.random() * 500, 1);
+Potion.list[0] = new Potion(parseInt(Math.random() * 500), parseInt(Math.random() * 500), 1);
 
 setInterval(function(){
 	//Server update function
