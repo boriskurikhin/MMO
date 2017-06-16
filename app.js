@@ -18,6 +18,8 @@ serv.listen(process.env.PORT || 2000); //port 2000
 
 console.log("Server started...");
 
+
+
 var Entity = function() {
 
 	var self = { //constructor
@@ -44,9 +46,38 @@ var Entity = function() {
 	return self;
 }
 
+var Potion = function(xx, yy, type_) {
+	var self = {
+		x: xx,
+		y: yy,
+		type: type_
+	}
+	
+	self.getDistance = function(pt) {
+		return Math.sqrt(Math.pow(self.x - pt.x, 2) + Math.pow(self.y - pt.y, 2));
+	}
+	
+	self.getInitPack = function() {
+		return {
+			x: self.x,
+			y: self.y,
+			type: self.type,
+		};
+	}
+	
+	Potion.list[Math.random() * 10] = self;
+	
+	initPack.potion.push(self.getInitPack());
+	
+	return self;
+}
+
+Potion.list = {};
+
 var Player = function(id) {
 	var self = Entity();
 	self.id = id;
+	self.username = "";
 	self.number = "" + Math.floor(10 * Math.random());
 	self.pressingDown = false;
 	self.pressingLeft = false;
@@ -127,6 +158,7 @@ var Player = function(id) {
 }
 
 Player.list = {};
+
 
 Player.onConnect = function(socket) {
 	//when a player connects to the server
@@ -295,7 +327,6 @@ Bullet.update = function () {
 	return pack;
 }
 
-
 var DEBUG = false;
 
 var USERS = {
@@ -346,7 +377,9 @@ io.sockets.on('connection', function(socket){
 				socket.emit('signInResponse', {
 					success: true
 				});
+				
 				socket.emit('addToChat', 'Welcome ' + data.username);
+				Player.list[socket.id].username = data.username;
 
 			} else {
 				socket.emit('signInResponse', {
@@ -381,7 +414,7 @@ io.sockets.on('connection', function(socket){
 	});
 	
 	socket.on('sendMsgToServer', function(data) {
-		var playerName = ('' + socket.id).slice(2,7);
+		var playerName = Player.list[socket.id].username;
 		for (var i in socketList) {
 			socketList[i].emit('addToChat', playerName + ':' + data);
 		}
@@ -396,15 +429,17 @@ io.sockets.on('connection', function(socket){
 	
 });
 
-var initPack = {player:[], bullet: []};
-var removePack = {player:[], bullet: []};
+var initPack = {player:[], bullet: [], potion: []};
+var removePack = {player:[], bullet: [], potion: []};
+
+Potion.list[0] = new Potion(Math.random() * 500, Math.random() * 500, 1);
 
 setInterval(function(){
 	//Server update function
 	
 	var pack = {
 		player: Player.update(),
-		bullet: Bullet.update(),
+		bullet: Bullet.update()
 	}
 	
 	for (var i in socketList) {
@@ -419,8 +454,11 @@ setInterval(function(){
 	
 	initPack.player = [];
 	initPack.bullet = [];
+	//initPack.potion = [];
+	
 	removePack.player = [];
 	removePack.bullet = [];
+	removePack.potion = [];
 	
 }, 1000/30.0 /*25 frames/second*/);
 

@@ -140,13 +140,15 @@
 			var Img = {};
 			Img.player = new Image();
 			Img.player.src = '/client/img/player1.png';
+			Img.potionBlue = new Image();
+			Img.potionBlue.src = '/client/img/pot1.png';
 			Img.bullet = new Image();
 			Img.bullet.src = '/client/img/mageshot1.png';
 			Img.map = new Image();
 			Img.map.src = '/client/img/map.png';
 			
 			
-
+			
 			
 			var Bullet = function(initPack) {
 				
@@ -178,7 +180,31 @@
 			
 			Bullet.list = {};
 			
-						var Player = function(initPack) {
+			var Potion = function(initPack){
+				var self = {};
+				self.x = initPack.x;
+				self.id = initPack.id;
+				self.y = initPack.y;
+				self.type = initPack.type;
+				
+				var x = self.x - Player.list[selfId].x + WIDTH / 2;
+				var y = self.y - Player.list[selfId].y + HEIGHT / 2;
+				
+				self.draw = function(){
+					canv.drawImage(Img.potionBlue, 0, 0, Img.potionBlue.width, 
+								 Img.potionBlue.height, x,
+								  y, 30, 30);
+				}
+				
+				Potion.list[self.id] = self;
+				
+				return self;
+			}
+			
+			Potion.list = {};
+			
+			
+			var Player = function(initPack) {
 				var self = {};
 				self.id = initPack.id;
 				self.number = initPack.number;
@@ -233,12 +259,17 @@
 				if (data.selfId) {
 					selfId = data.selfId;
 				}
+				
 				for (var i = 0; i < data.player.length; i++) {
 					new Player(data.player[i]);
 				}
 				for (var i = 0; i < data.bullet.length; i++) {
 					new Bullet(data.bullet[i]);
 				}
+				if (selfId !== null && data.potion !== undefined)
+					for (var i = 0; i < data.potion.length; i++) {
+						new Potion(data.potion[i]);
+					}
 			});
 			
 			
@@ -283,6 +314,10 @@
 				for (var i = 0; i < data.bullet.length; i++) {
 					delete Bullet.list[data.bullet[i]];
 				}
+				/*
+				for (var i = 0; i < data.potion.length; i++) {
+					delete Potion.list[data.potion[i]];
+				}*/
 			});
 			
 			//draw to screen
@@ -303,6 +338,9 @@
 				}
 				for (var i in Bullet.list) {
 					Bullet.list[i].draw();
+				}
+				for (var i in Potion.list) {
+					Potion.list[i].draw();
 				}
 			}, 40);
 			
@@ -346,6 +384,7 @@
 					
 			document.onkeydown = function(e) {
 				if (chatInput.focus===1) {
+					console.log("something's being typed..");
 					return;
 				}
 				

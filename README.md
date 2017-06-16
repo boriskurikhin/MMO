@@ -4,7 +4,7 @@ A small in-browser 2d mmo made with JavaScript libraries. This is going to be my
 
 ## Releases
 
-No working beta is out yet.
+The current beta version can be found [here](https://desolate-citadel-35923.herokuapp.com/).
 
 ## Built With
 
