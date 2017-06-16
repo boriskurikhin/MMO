@@ -16,6 +16,7 @@ The current beta version can be found [here](https://desolate-citadel-35923.hero
 
 * **Boris Skurikhin** - *Front/Back End & Inital Work*
 * **Octavian Gherghe** - *Graphic Design*
+* **Joey Yu** - *Quality Assurance & Testing*
 
 Major shout out to [RainingChain](https://www.youtube.com/channel/UC8Yp-YagXZ4C5vOduEhcjRw) for his YouTube tutorials!
 
