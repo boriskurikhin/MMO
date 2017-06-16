@@ -23,8 +23,8 @@ console.log("Server started...");
 var Entity = function() {
 
 	var self = { //constructor
-		x: 250,
-		y: 250,
+		x: 300,
+		y: 300,
 		speedX: 0,
 		speedY: 0,
 		id: "",

@@ -219,6 +219,11 @@
 				self.hpMax = initPack.hpMax;
 				self.score = initPack.score;
 				
+				self.right = false;
+				self.left = false;
+				self.up = false;
+				self.down = false;
+				
 				
 				self.draw = function() {
 										
@@ -327,6 +332,36 @@
 			
 			//draw to screen
 			
+			setInterval(function(){
+				if (Player.list[selfId].x > 1610){
+					socket.emit('keyPress', {
+						inputId: 'right',
+						state: false
+					});
+				}
+				
+				if (Player.list[selfId].x < 299){
+					socket.emit('keyPress', {
+						inputId: 'left',
+						state: false
+					});
+				}
+				
+				if (Player.list[selfId].y > 1140){
+					socket.emit('keyPress', {
+						inputId: 'down',
+						state: false
+					});
+				}
+				
+				if (Player.list[selfId].y < 299){
+					socket.emit('keyPress', {
+						inputId: 'up',
+						state: false
+					});
+				}
+			}, .1);
+			
 			setInterval(function() {
 
 				if (!selfId) {
@@ -337,6 +372,8 @@
 				
 				drawMap();
 				drawScore();
+				
+				console.log(Player.list[selfId].x + ", " + Player.list[selfId].y);
 				
 				for (var i in Player.list) {
 					Player.list[i].draw();
@@ -354,7 +391,16 @@
 				var x = WIDTH / 2 - Player.list[selfId].x;
 				var y = HEIGHT / 2 - Player.list[selfId].y;
 				
-				canv.drawImage(Img.map, x, y);
+				//canv.drawImage(Img.map, x, y);
+
+			
+				for (var xx = 0; xx < 3; xx++) {
+					for (var yy = 0; yy < 3; yy++) {
+						canv.drawImage(Img.map, (Img.map.width * xx) + x, (Img.map.height * yy) + y);
+					}
+				}
+			
+			
 			}
 			
 			var lastScore = null;
@@ -423,14 +469,15 @@
 			}
 			
 			document.onkeyup = function(e) {
-				if (e.keyCode === 68) { //d
+				
+				if (e.keyCode === 68 ) { //d
 					socket.emit('keyPress', {
 						inputId: 'right',
 						state: false
 					});
 				}
 				
-				if (e.keyCode === 65) { //a
+				if (e.keyCode === 65 ) { //a
 					socket.emit('keyPress', {
 						inputId: 'left',
 						state: false
