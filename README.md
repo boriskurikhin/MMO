@@ -15,6 +15,7 @@ The current beta version can be found [here](https://desolate-citadel-35923.hero
 ## Authors
 
 * **Boris Skurikhin** - *Front/Back End & Inital Work*
+* **Mehdi Aleali** - *Front/Back End*
 * **Octavian Gherghe** - *Graphic Design*
 * **Joey Yu** - *Quality Assurance & Testing*
 
