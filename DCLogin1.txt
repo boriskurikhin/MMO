@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+
+<style>
+
+body	{background-image: img );} /*idk how to fix this*/ 
+h1	{border: 5px solid green;
+	 padding: 30px;}
+div.form {
+		display: block;
+		text-align: center;}
+form { display: inline-block; 
+	   margin-left: auto; 
+       margin-right: auto; 
+       text-align: left; }
+       
+</style>
+<body>
+	<h1 style="text-align:center;"><b>Desolate Citadel</b></h1>
+	<p style="text-align:center;" ><i>Welcome!</i></p>
+
+<div style="background-color:#999966;color:black;padding:20px;">
+<div class="form">
+<form>
+Username:<br> 
+	<input type="text" name="username">
+<br>
+Password:<br>
+	<input type="password" name="password">
+<br>
+<br><input type="submit" value="Login">
+<input type="submit" value="Signup">
+<br>
+</form>
+</div>
+
+    
+</body>
+</html>
