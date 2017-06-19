@@ -19,6 +19,7 @@ serv.listen(process.env.PORT || 2000); //port 2000
 console.log("Server started...");
 
 
+//Parent class of most object classes, as they extend the entity class
 
 var Entity = function() {
 
@@ -46,6 +47,8 @@ var Entity = function() {
 	return self;
 }
 
+//Potion class
+
 var Potion = function(xx, yy, type_) {
 	var self = {
 		x: xx,
@@ -53,10 +56,12 @@ var Potion = function(xx, yy, type_) {
 		type: type_
 	}
 	
+	//returns the hypotenuse
 	self.getDistance = function(pt) {
 		return Math.sqrt(Math.pow(self.x - pt.x, 2) + Math.pow(self.y - pt.y, 2));
 	}
 	
+	//returns the initilization pack for when players connect to the server. Sends eveybody the potion.
 	self.getInitPack = function() {
 		return {
 			x: self.x,
@@ -64,6 +69,7 @@ var Potion = function(xx, yy, type_) {
 			type: self.type,
 		};
 	}
+	
 	
 	Potion.list[Math.random() * 10] = self;
 	
@@ -74,8 +80,11 @@ var Potion = function(xx, yy, type_) {
 
 Potion.list = {};
 
+//Player class
+
 var Player = function(id) {
 	var self = Entity();
+	//glboal variables
 	self.id = id;
 	self.username = "";
 	self.number = "" + Math.floor(10 * Math.random());
@@ -92,13 +101,14 @@ var Player = function(id) {
 	
 	var super_update = self.update;
 	
+	//check if player pressed shoot on the client side, and then spawn a bullet on the server and later send it out to the client.
 	self.update = function() {
 		self.updateSpeed();
 		super_update();
 		if (self.pressingAttck) {
 			self.shootBullet(self.mouseAngle);
 		}
-		
+		//hello
 	}
 	
 	self.shootBullet = function(angle) {
@@ -107,7 +117,7 @@ var Player = function(id) {
 		bullet.y = self.y;
 	}
 	
-
+	//check clientSide inputs and set them on the server
 	self.updateSpeed = function() {
 		if (self.pressingRight) {
 			self.speedX = self.maxSpeed;
@@ -126,7 +136,7 @@ var Player = function(id) {
 		}
 	}
 	
-	
+	//initialization package
 	self.getInitPack = function() {
 		return {
 			id: self.id,
@@ -149,6 +159,7 @@ var Player = function(id) {
 		};
 	}
 	
+	//add player to the server list and package to send out to the clients.
 	
 	Player.list[id] = self;
 	
@@ -199,6 +210,8 @@ Player.onConnect = function(socket) {
 	})
 }
 
+//Collect all init packs in one list
+
 Player.getAllInitPack = function() {
 	var players = [];
 	for (var i in Player.list) {
@@ -207,6 +220,7 @@ Player.getAllInitPack = function() {
 	return players;
 }
 
+//When player disconnects
 Player.onDisconnect = function(socket){
 	delete Player.list[socket.id];
 	removePack.player.push(socket.id);
@@ -221,6 +235,9 @@ Player.update = function () {
 	
 	var pack = [];
 	
+	//Updates positions and prepares an updated x,y coordinates in a package
+	//to send out to the clients.
+	
 	for (var i in Player.list) {
 		//Loops through each currently connected socket
 		var player = Player.list[i];
@@ -229,6 +246,8 @@ Player.update = function () {
 	}
 	return pack;
 }
+
+//Bullet class
 
 var Bullet = function (parent, theta) {
 	var self = Entity();
@@ -243,7 +262,7 @@ var Bullet = function (parent, theta) {
 	
 	var super_update = self.update;
 	
-	
+	//on update, keep incrementing the timer
 	self.update = function(){
 		
 		if (self.timer++ > 100) {
@@ -254,14 +273,16 @@ var Bullet = function (parent, theta) {
 		
 		for (var i in Player.list) {
 			var p = Player.list[i];
+			//if the bullet hits the player && makes sure it doesn't hit the player who shot the bullet
 			if (self.getDistance(p) < 32 && self.parent !== p.id) {
 				
 				p.hp--;
 				
 				if (p.hp <= 0 ) {
-					
+					//Who shot the bullet
 					var shooter = Player.list[self.parent];
-				
+					
+					//If he hasn't logged out yet
 					if (shooter) {
 						shooter.score += 1;	
 						p.score = Math.max(0, p.score - 1);
