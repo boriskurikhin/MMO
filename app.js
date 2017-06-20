@@ -301,6 +301,7 @@ var Bullet = function (parent, theta) {
 	
 	Bullet.list[self.id] = self;
 	
+	//creates an init socket for the bullet
 	self.getInitPack = function() {
 		return {
 			id: self.id,
@@ -309,6 +310,7 @@ var Bullet = function (parent, theta) {
 		};
 	}
 	
+	//creates an update socket for the bullet
 	self.getUpdatePack = function() {
 		return {
 			id: self.id,
@@ -338,24 +340,29 @@ Bullet.update = function () {
 	for (var i in Bullet.list) {
 		var b = Bullet.list[i];
 		b.update();
+		//if the bullet needs to be deleted
 		if (b.toRemove) {
 			delete Bullet.list[i];
 			removePack.bullet.push(b.id);
 		}
+		//otherwise send it out to clients
 		else 
 			pack.push(b.getUpdatePack());
 	}
 	return pack;
 }
 
+//for debuging database, coordinates and so on
 var DEBUG = false;
 
 var USERS = {
 	/*username:password database*/
+	//This was a placeholder before the database was created
 }
 
 var isValidPassword = function(data, cb){
 	//return cb(true);
+	//acess database
 	db.account.find({ username: data.username, password: data.password}, function(err, res) 
 	{
 		if (res.length > 0)
@@ -367,6 +374,7 @@ var isValidPassword = function(data, cb){
 
 var isUsernameTaken = function(data, cb) {
 	//return cb(false);
+	//access database
 	db.account.find({username: data.username}, function(err, res) 
 	{
 		if (res.length > 0)
@@ -378,6 +386,7 @@ var isUsernameTaken = function(data, cb) {
 
 var addUser = function(data, cb){
 	//return cb();
+	//insert a new docuemnt into the mongodb
 	db.account.insert({ username: data.username, password: data.password}, function(err) 
 	{
 		cb();
@@ -393,16 +402,21 @@ io.sockets.on('connection', function(socket){
 
 	socket.on('signIn', function(data) {
 		isValidPassword(data, function(res){
+			//if the user successfully connects to the server
 			if (res) {
 				Player.onConnect(socket);
 				socket.emit('signInResponse', {
 					success: true
 				});
-				
-				socket.emit('addToChat', 'Welcome ' + data.username);
+				//add a welcome message to the chat
+				for (var i in socketList) {
+					socketList[i].emit('addToChat', data.username + " has joined the server!");
+				}
+				//add player to the list
 				Player.list[socket.id].username = data.username;
 
 			} else {
+				
 				socket.emit('signInResponse', {
 					success: false
 				});
@@ -412,6 +426,7 @@ io.sockets.on('connection', function(socket){
 	
 	socket.on('signUp', function(data) {
 		isUsernameTaken(data, function(res) {
+			//if the username is taken, send back a socket saying you cannot make an account
 			if (res) {
 				socket.emit('signUpResponse', {
 					success: false
@@ -426,6 +441,7 @@ io.sockets.on('connection', function(socket){
 		});
 	});
 	
+	//Server side debugging
 	console.log('New socket connected...');
 	
 	//if socket is disconnected, it is then deleted
@@ -436,6 +452,7 @@ io.sockets.on('connection', function(socket){
 	
 	socket.on('sendMsgToServer', function(data) {
 		var playerName = Player.list[socket.id].username;
+		//Sends out a message to all players
 		for (var i in socketList) {
 			socketList[i].emit('addToChat', playerName + ':' + data);
 		}
@@ -458,6 +475,7 @@ Potion.list[0] = new Potion(parseInt(Math.random() * 500), parseInt(Math.random(
 setInterval(function(){
 	//Server update function
 	
+	//information we send out to clients
 	var pack = {
 		player: Player.update(),
 		bullet: Bullet.update()
@@ -466,12 +484,14 @@ setInterval(function(){
 	for (var i in socketList) {
 		//Sends clients back the updated information
 		var socket = socketList[i];
-		socket.emit('init', initPack);
+		socket.emit('init', initPack); //stuff to add
 		
-		socket.emit('update', pack);
+		socket.emit('update', pack); //stuff to update
 		
-		socket.emit('remove', removePack);
+		socket.emit('remove', removePack); //stuff to delete (mostly bullets)
 	}
+	
+	//reset packs
 	
 	initPack.player = [];
 	initPack.bullet = [];
