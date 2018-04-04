@@ -11,12 +11,12 @@
 	</head>
 
 	<body>
-		
-		
+
+
 		<div id="gameDiv" style="display:none" >
 			<canvas id="ctx" width="500" height="500" style=" border:1px solid #000000;position: absolute; left: 8px; top:8px;"></canvas>
 			<canvas id="ctx-ui" width="500" height="500" style="position: absolute; left: 8px; top:8px;"></canvas>
-			
+
 			<div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll; position: absolute; top: 508px;">
 				<div>
 					<p>Welcome to the chat!</p>
@@ -26,8 +26,8 @@
 				<input id="chat-input" type="text" style="width:500px;" onfocus="focus=1" onblur="focus=0"/>
 			</form>
 		</div>
-		
-		<div id="signDiv" style="">	
+
+		<div id="signDiv" style="">
 			<img src="/client/img/bg.jpg" alt="Welcome to Legend of Hightlands!">
 			<div class="container">
 				 Username: <input id="signDiv-username" type="text"/><br>
@@ -36,56 +36,57 @@
 				<button id="signDiv-signUp">Sign Up</button>
 			</div>
 		</div>
-		
+
 		<script src="/client/js/socket.js" type="text/javascript"></script>
-		
+
 		<script>
 			/* Arduino Controller Stuff
-			
+
 			var port = 'COM4';
-			
+
 			if (Connect(port, 57600)) {
 				console.log("Connected");
 			} else {
 				console.log("not connected");
 			}
 			*/
-			
-			
+
+
 		</script>
-		
+
 		<script>
-			
+
+			var loggedIn = false;
 			var socket = io();
-			
+
 			/*
 			var port = new SerialPort('/dev/tty-usbserial1', {
 				baudRate: 57600
 			});
 			*/
-			
+
 			var WIDTH = 500;
 			var HEIGHT = 500;
-			
+
 			//register/sign in
-			
+
 			var signDiv = document.getElementById('signDiv');
 
 			var signDivUsername = document.getElementById('signDiv-username');
-			
+
 			var signDivSignIn = document.getElementById('signDiv-signIn');
-			
+
 			var signDivSignUp = document.getElementById('signDiv-signUp');
-			
+
 			var signDivPassword = document.getElementById('signDiv-password');
-			
+
 			signDivSignIn.onclick = function() {
 				socket.emit('signIn', {
 					username: signDivUsername.value,
 					password: signDivPassword.value
 				});
 			}
-			
+
 			signDivSignUp.onclick = function() {
 				var _user = signDivUsername.value.replace(/<(?:.|\n)*?>/gm, '');
 				if (_user && _user.length > 4 && _user.length < 11) {
@@ -97,16 +98,18 @@
 					alert("Invalid username.");
 				}
 			}
-			
+
 			socket.on('signInResponse', function(data) {
 				if (data.success) {
+					loggedIn = true;
 					signDiv.style.display = 'none';
 					document.getElementById("gameDiv").style.display = "inline-block";
+
 				} else {
 					alert('Sign in unsuccessful.');
 				}
 			});
-			
+
 			socket.on('signUpResponse', function(data) {
 				if (data.success) {
 					alert('You have made an account!')
@@ -114,440 +117,429 @@
 					alert('Such user already exists.');
 				}
 			});
-			
-			
+
+
 			//game
-			var canv = document.getElementById('ctx').getContext("2d");
-			var canvUi = document.getElementById('ctx-ui').getContext('2d');
-			var chatText = document.getElementById('chat-text');
-			var chatInput = document.getElementById('chat-input');
-			var chatForm = document.getElementById('chat-form');
-			
-			canvUi.font = '30px Lato sans-serif';
-			
-			socket.on('addToChat', function(data) {
-				chatText.innerHTML += '<div><p>' + data + '</p></div>';
-			});
-			
-			socket.on('evalAnswer', function(data) {
-				console.log(data);
-			});
-			
-			chatForm.onsubmit = function(e) {
-				e.preventDefault();
-				if (chatInput.value[0] === '/')
-					socket.emit('evalServer', chatInput.value.slice(1));
-				else
-					socket.emit('sendMsgToServer', chatInput.value.replace(/<(?:.|\n)*?>/gm, ''));
-				chatInput.value = '';
-			}
-			
-			var Img = {};
-			Img.player = new Image();
-			Img.player.src = '/client/img/player1.png';
-			Img.potionBlue = new Image();
-			Img.potionBlue.src = '/client/img/pot1.png';
-			Img.bullet = new Image();
-			Img.bullet.src = '/client/img/mageshot1.png';
-			Img.map = new Image();
-			Img.map.src = '/client/img/map.png';
-			
-			
-			
-			
-			var Bullet = function(initPack) {
-				
-				var self = {};
-				self.id = initPack.id;
-				self.x = initPack.x;
-				self.y = initPack.y;
-				Bullet.list[self.id] = self;
-				
-				self.draw = function() {
-				var width = Img.bullet.width / 2;
-				var height = Img.bullet.height / 2;
-					
-				var x = self.x - Player.list[selfId].x + WIDTH / 2;
-				var y = self.y - Player.list[selfId].y + HEIGHT / 2;
-					
-					
-					
-					canv.drawImage(Img.bullet,
-								 0, 0, Img.bullet.width, Img.bullet.height,
-								 x - width/2, y-height/2, width, height);
-					
-					
-				
+
+			//if (loggedIn) {
+				var canv = document.getElementById('ctx').getContext("2d");
+				var canvUi = document.getElementById('ctx-ui').getContext('2d');
+				var chatText = document.getElementById('chat-text');
+				var chatInput = document.getElementById('chat-input');
+				var chatForm = document.getElementById('chat-form');
+
+				canvUi.font = '30px Lato sans-serif';
+
+				socket.on('addToChat', function(data) {
+					chatText.innerHTML += '<div><p>' + data + '</p></div>';
+				});
+
+				socket.on('evalAnswer', function(data) {
+					console.log(data);
+				});
+
+				chatForm.onsubmit = function(e) {
+					e.preventDefault();
+					if (chatInput.value[0] === '/')
+						socket.emit('evalServer', chatInput.value.slice(1));
+					else
+						socket.emit('sendMsgToServer', chatInput.value.replace(/<(?:.|\n)*?>/gm, ''));
+					chatInput.value = '';
 				}
-				
-				return self;
-			}
-			
-			Bullet.list = {};
-			
-			var Potion = function(initPack){
-				var self = {};
-				self.x = initPack.x;
-				self.id = initPack.id;
-				self.y = initPack.y;
-				self.type = initPack.type;
-				
-				var x = self.x - Player.list[selfId].x + WIDTH / 2;
-				var y = self.y - Player.list[selfId].y + HEIGHT / 2;
-				
-				self.draw = function(){
-					canv.drawImage(Img.potionBlue, 0, 0, Img.potionBlue.width, 
-								 Img.potionBlue.height, x,
-								  y, 30, 30);
-				}
-				
-				Potion.list[self.id] = self;
-				
-				return self;
-			}
-			
-			Potion.list = {};
-			
-			
-			var Player = function(initPack) {
-				var self = {};
-				self.id = initPack.id;
-				self.number = initPack.number;
-				self.x = initPack.x;
-				self.y = initPack.y;
-				self.hp = initPack.hp;
-				self.hpMax = initPack.hpMax;
-				self.score = initPack.score;
-				
-				self.right = false;
-				self.left = false;
-				self.up = false;
-				self.down = false;
-				
-				
-				self.draw = function() {
-										
+
+				var Img = {};
+				Img.player = new Image();
+				Img.player.src = '/client/img/player1.png';
+				Img.potionBlue = new Image();
+				Img.potionBlue.src = '/client/img/pot1.png';
+				Img.bullet = new Image();
+				Img.bullet.src = '/client/img/mageshot1.png';
+				Img.map = new Image();
+				Img.map.src = '/client/img/map.png';
+
+
+
+
+				var Bullet = function(initPack) {
+
+					var self = {};
+					self.id = initPack.id;
+					self.x = initPack.x;
+					self.y = initPack.y;
+					Bullet.list[self.id] = self;
+
+					self.draw = function() {
+					var width = Img.bullet.width / 2;
+					var height = Img.bullet.height / 2;
+
 					var x = self.x - Player.list[selfId].x + WIDTH / 2;
 					var y = self.y - Player.list[selfId].y + HEIGHT / 2;
-					
-					var hpWidth = 30 * (self.hp / self.hpMax);
-					//console.log(hpWidth + ' is hp width');
-					
-					
-					canv.fillStyle = 'red';
-					canv.fillRect(x - hpWidth/2, y + 40, hpWidth, 4);
-					
-					var width = 50;
-					var height = 50;
-					
-					
-					canv.drawImage(Img.player, 0, 0, Img.player.width, 
-								 Img.player.height, x - width/2,
-								  y - height/2, width, height);
-					
-					
-					//canv.fillText(self.score, self.x, self.y-40);
-					
-					//canv.fillText(self.number, self.x, self.y);
-				}
-				
-				Player.list[self.id] = self;
-				
-				
-				
-				return self;
-			}
-			
-			Player.list = {};
-			
-			
-			//init - when new things are created, the package will contain all data
-			
-			var selfId = null;
-			
-			socket.on('init', function(data) {
-				if (data.selfId) {
-					selfId = data.selfId;
-				}
-				
-				for (var i = 0; i < data.player.length; i++) {
-					new Player(data.player[i]);
-				}
-				for (var i = 0; i < data.bullet.length; i++) {
-					new Bullet(data.bullet[i]);
-				}
-				if (selfId !== null && data.potion !== undefined)
-					for (var i = 0; i < data.potion.length; i++) {
-						new Potion(data.potion[i]);
-					}
-			});
-			
-			
-			//update - difference between old package and new update
-			
-			socket.on('update', function(data) {
-				for (var i = 0; i < data.player.length; i++) {
-					var pack = data.player[i];
-					var p = Player.list[pack.id];
-					if (p) {
-						if (pack.x !== undefined)
-							p.x = pack.x;
-						if (pack.y !== undefined) 
-							p.y = pack.y
-						if (pack.hp !== undefined) 
-							p.hp = pack.hp;
-						if (pack.score !== undefined)
-							p.score = pack.score;
-					}
-				}
-				for (var i = 0; i < data.bullet.length; i++) {
-					var pack = data.bullet[i];
-					var b = Bullet.list[data.bullet[i].id];
-					if (b) {
-						if (pack.x !== undefined)
-							b.x = pack.x;
-						if (pack.y !== undefined)
-							b.y = pack.y;
-					} 
-				}
-				
-			});
-			
-			
-			//remove - notifies client when a player was removed
-			
-			socket.on('remove', function(data) {
-				for (var i = 0; i < data.player.length; i++) {
-					delete Player.list[data.player[i]];
-				}
-				
-				for (var i = 0; i < data.bullet.length; i++) {
-					delete Bullet.list[data.bullet[i]];
-				}
-				/*
-				for (var i = 0; i < data.potion.length; i++) {
-					delete Potion.list[data.potion[i]];
-				}*/
-			});
-			
-			//draw to screen
-			
-			setInterval(function(){
-				if (Player.list[selfId].x > 1610){
-					socket.emit('keyPress', {
-						inputId: 'right',
-						state: false
-					});
-				}
-				
-				if (Player.list[selfId].x < 299){
-					socket.emit('keyPress', {
-						inputId: 'left',
-						state: false
-					});
-				}
-				
-				if (Player.list[selfId].y > 1140){
-					socket.emit('keyPress', {
-						inputId: 'down',
-						state: false
-					});
-				}
-				
-				if (Player.list[selfId].y < 299){
-					socket.emit('keyPress', {
-						inputId: 'up',
-						state: false
-					});
-				}
-			}, .1);
-			
-			setInterval(function() {
 
-				if (!selfId) {
-					return;
-				}
-				
-				canv.clearRect(0, 0, 500, 500);
-				
-				drawMap();
-				drawScore();
-				
-				console.log(Player.list[selfId].x + ", " + Player.list[selfId].y);
-				
-				for (var i in Player.list) {
-					Player.list[i].draw();
-				}
-				for (var i in Bullet.list) {
-					Bullet.list[i].draw();
-				}
-				for (var i in Potion.list) {
-					Potion.list[i].draw();
-				}
-			}, 40);
-			
-			var drawMap = function() {
-				
-				var x = WIDTH / 2 - Player.list[selfId].x;
-				var y = HEIGHT / 2 - Player.list[selfId].y;
-				
-				//canv.drawImage(Img.map, x, y);
 
-			
-				for (var xx = 0; xx < 3; xx++) {
-					for (var yy = 0; yy < 3; yy++) {
-						canv.drawImage(Img.map, (Img.map.width * xx) + x, (Img.map.height * yy) + y);
+
+						canv.drawImage(Img.bullet,
+									 0, 0, Img.bullet.width, Img.bullet.height,
+									 x - width/2, y-height/2, width, height);
+
+
+
 					}
+
+					return self;
 				}
-			
-			
-			}
-			
-			var lastScore = null;
-			
-			var drawScore = function() {
-				if (lastScore === Player.list[selfId].score)
-					return;
-				lastScore = Player.list[selfId].score;
-				canvUi.clearRect(0, 0, 500, 500);
-				canvUi.fillStyle = 'white';
-				canvUi.fillText(Player.list[selfId].score,
-							 0, 30);
-			}
-			
-			//Arduino port reading
-			/*
-			port.on('open', function(){
-				port.write('turn on', function(err) {
-					if (err) {
-						return console.log("error on write, " + err.message);
+
+				Bullet.list = {};
+
+				var Potion = function(initPack){
+					var self = {};
+					self.x = initPack.x;
+					self.id = initPack.id;
+					self.y = initPack.y;
+					self.type = initPack.type;
+
+					var x = self.x - Player.list[selfId].x + WIDTH / 2;
+					var y = self.y - Player.list[selfId].y + HEIGHT / 2;
+
+					self.draw = function(){
+						canv.drawImage(Img.potionBlue, 0, 0, Img.potionBlue.width,
+									 Img.potionBlue.height, x,
+									  y, 30, 30);
 					}
-					console.log("message written");
+
+					Potion.list[self.id] = self;
+
+					return self;
+				}
+
+				Potion.list = {};
+
+				var Player = function(initPack) {
+					var self = {};
+					self.id = initPack.id;
+					self.number = initPack.number;
+					self.x = initPack.x;
+					self.y = initPack.y;
+					self.hp = initPack.hp;
+					self.hpMax = initPack.hpMax;
+					self.score = initPack.score;
+
+					self.right = false;
+					self.left = false;
+					self.up = false;
+					self.down = false;
+
+
+					self.draw = function() {
+
+						var x = self.x - Player.list[selfId].x + WIDTH / 2;
+						var y = self.y - Player.list[selfId].y + HEIGHT / 2;
+
+						var hpWidth = 30 * (self.hp / self.hpMax);
+						//console.log(hpWidth + ' is hp width');
+
+
+						canv.fillStyle = 'red';
+						canv.fillRect(x - hpWidth/2, y + 40, hpWidth, 4);
+
+						var width = 50;
+						var height = 50;
+
+
+						canv.drawImage(Img.player, 0, 0, Img.player.width,
+									 Img.player.height, x - width/2,
+									  y - height/2, width, height);
+
+
+						//canv.fillText(self.score, self.x, self.y-40);
+
+						//canv.fillText(self.number, self.x, self.y);
+					}
+
+					Player.list[self.id] = self;
+
+
+
+					return self;
+				}
+
+				Player.list = {};
+
+
+				//init - when new things are created, the package will contain all data
+
+				var selfId = null;
+
+				socket.on('init', function(data) {
+					if (data.selfId) {
+						selfId = data.selfId;
+					}
+
+					for (var i = 0; i < data.player.length; i++) {
+						new Player(data.player[i]);
+					}
+					for (var i = 0; i < data.bullet.length; i++) {
+						new Bullet(data.bullet[i]);
+					}
+					if (selfId !== null && data.potion !== undefined)
+						for (var i = 0; i < data.potion.length; i++) {
+							new Potion(data.potion[i]);
+						}
 				});
-			});
-			
-			port.on('error', function(err) {
-				if (err)
-					console.log("just error in general " + err.message);
-				console.log("message written");
-			});
-			*/
-					
-			document.onkeydown = function(e) {
-				if (chatInput.focus===1) {
-					console.log("something's being typed..");
-					return;
+
+
+				//update - difference between old package and new update
+
+				socket.on('update', function(data) {
+					for (var i = 0; i < data.player.length; i++) {
+						var pack = data.player[i];
+						var p = Player.list[pack.id];
+						if (p) {
+							if (pack.x !== undefined)
+								p.x = pack.x;
+							if (pack.y !== undefined)
+								p.y = pack.y
+							if (pack.hp !== undefined)
+								p.hp = pack.hp;
+							if (pack.score !== undefined)
+								p.score = pack.score;
+						}
+					}
+					for (var i = 0; i < data.bullet.length; i++) {
+						var pack = data.bullet[i];
+						var b = Bullet.list[data.bullet[i].id];
+						if (b) {
+							if (pack.x !== undefined)
+								b.x = pack.x;
+							if (pack.y !== undefined)
+								b.y = pack.y;
+						}
+					}
+
+				});
+
+
+				//remove - notifies client when a player was removed
+
+				socket.on('remove', function(data) {
+					for (var i = 0; i < data.player.length; i++) {
+						delete Player.list[data.player[i]];
+					}
+
+					for (var i = 0; i < data.bullet.length; i++) {
+						delete Bullet.list[data.bullet[i]];
+					}
+					/*
+					for (var i = 0; i < data.potion.length; i++) {
+						delete Potion.list[data.potion[i]];
+					}*/
+				});
+
+				//draw to screen
+
+				if (loggedIn) {
+					setInterval(function(){
+						if (Player.list[selfId].x > 1610){
+							socket.emit('keyPress', {
+								inputId: 'right',
+								state: false
+							});
+						}
+
+						if (Player.list[selfId].x < 299){
+							socket.emit('keyPress', {
+								inputId: 'left',
+								state: false
+							});
+						}
+
+						if (Player.list[selfId].y > 1140){
+							socket.emit('keyPress', {
+								inputId: 'down',
+								state: false
+							});
+						}
+
+						if (Player.list[selfId].y < 299){
+							socket.emit('keyPress', {
+								inputId: 'up',
+								state: false
+							});
+						}
+					}, .1);
+
 				}
-				
-				if (e.keyCode === 68) { //d
-					socket.emit('keyPress', {
-						inputId: 'right',
-						state: true
-					});
+
+				setInterval(function() {
+
+					if (!selfId) {
+						return;
+					}
+
+					canv.clearRect(0, 0, 500, 500);
+
+					drawMap();
+					drawScore();
+
+					//console.log(Player.list[selfId].x + ", " + Player.list[selfId].y);
+
+					for (var i in Player.list) {
+						Player.list[i].draw();
+					}
+					for (var i in Bullet.list) {
+						Bullet.list[i].draw();
+					}
+					for (var i in Potion.list) {
+						Potion.list[i].draw();
+					}
+				}, 40);
+
+
+				var drawMap = function() {
+
+					var x = WIDTH / 2 - Player.list[selfId].x;
+					var y = HEIGHT / 2 - Player.list[selfId].y;
+
+					//canv.drawImage(Img.map, x, y);
+
+
+					for (var xx = 0; xx < 3; xx++) {
+						for (var yy = 0; yy < 3; yy++) {
+							canv.drawImage(Img.map, (Img.map.width * xx) + x, (Img.map.height * yy) + y);
+						}
+					}
+
+
 				}
-				
-				if (e.keyCode === 65) { //a
-					socket.emit('keyPress', {
-						inputId: 'left',
-						state: true
-					});
+
+				var lastScore = null;
+
+				var drawScore = function() {
+					if (lastScore === Player.list[selfId].score)
+						return;
+					lastScore = Player.list[selfId].score;
+					canvUi.clearRect(0, 0, 500, 500);
+					canvUi.fillStyle = 'white';
+					canvUi.fillText(Player.list[selfId].score,
+								 0, 30);
 				}
-				
-				if (e.keyCode === 83) { //s
-					socket.emit('keyPress', {
-						inputId: 'down',
-						state: true
-					});
+
+
+
+				document.onkeydown = function(e) {
+					if (chatInput.focus===1) {
+						console.log("something's being typed..");
+						return;
+					}
+
+					if (e.keyCode === 68) { //d
+						socket.emit('keyPress', {
+							inputId: 'right',
+							state: true
+						});
+					}
+
+					if (e.keyCode === 65) { //a
+						socket.emit('keyPress', {
+							inputId: 'left',
+							state: true
+						});
+					}
+
+					if (e.keyCode === 83) { //s
+						socket.emit('keyPress', {
+							inputId: 'down',
+							state: true
+						});
+					}
+
+					if (e.keyCode === 87) { //w
+						socket.emit('keyPress', {
+							inputId: 'up',
+							state: true
+						});
+					}
 				}
-				
-				if (e.keyCode === 87) { //w
-					socket.emit('keyPress', {
-						inputId: 'up',
-						state: true
-					});
+
+				document.onkeyup = function(e) {
+
+					if (e.keyCode === 68 ) { //d
+						socket.emit('keyPress', {
+							inputId: 'right',
+							state: false
+						});
+					}
+
+					if (e.keyCode === 65 ) { //a
+						socket.emit('keyPress', {
+							inputId: 'left',
+							state: false
+						});
+					}
+
+					if (e.keyCode === 83) { //s
+						socket.emit('keyPress', {
+							inputId: 'down',
+							state: false
+						});
+					}
+
+					if (e.keyCode === 87) { //w
+						socket.emit('keyPress', {
+							inputId: 'up',
+							state: false
+						});
+					}
 				}
-			}
-			
-			document.onkeyup = function(e) {
-				
-				if (e.keyCode === 68 ) { //d
-					socket.emit('keyPress', {
-						inputId: 'right',
-						state: false
-					});
-				}
-				
-				if (e.keyCode === 65 ) { //a
-					socket.emit('keyPress', {
-						inputId: 'left',
-						state: false
-					});
-				}
-				
-				if (e.keyCode === 83) { //s
-					socket.emit('keyPress', {
-						inputId: 'down',
-						state: false
-					});
-				}
-				
-				if (e.keyCode === 87) { //w
-					socket.emit('keyPress', {
-						inputId: 'up',
-						state: false
-					});
-				}
-			}
-			
-			document.onmousedown = function(e) {
-				
-				if (e.clientX > 500 || e.clientY > 500)
-					return;
-				
+
+				document.onmousedown = function(e) {
+
+					if (e.clientX > 500 || e.clientY > 500)
+						return;
+
+						socket.emit('keyPress', {
+							inputId: 'attack',
+							state: true
+						});
+					}
+
+
+				document.onmouseup = function(e) {
+
+					if (e.clientX > 500 || e.clientY > 500)
+						return;
+
 					socket.emit('keyPress', {
 						inputId: 'attack',
-						state: true
+						state: false
 					});
 				}
-			
-			
-			document.onmouseup = function(e) {
-				
-				if (e.clientX > 500 || e.clientY > 500)
-					return;
-				
-				socket.emit('keyPress', {
-					inputId: 'attack',
-					state: false
-				});
-			}
-			
-			document.onmousemove = function(e) {
-				
-				if (!selfId) 
-					return;
-				
-				var x = e.clientX - 255
-				var y = e.clientY - 255;
-				
-				var angle = Math.atan2(y, x);
-				
-				//console.log(angle);
-				
-				//if (angle > 0) {
-					//angle += Math.PI;
+
+				document.onmousemove = function(e) {
+
+					if (!selfId)
+						return;
+
+					var x = e.clientX - 255
+					var y = e.clientY - 255;
+
+					var angle = Math.atan2(y, x);
+
+					//console.log(angle);
+
+					//if (angle > 0) {
+						//angle += Math.PI;
+				//}
+
+					angle = angle * 180 / Math.PI;
+
+					//console.log(angle);
+					socket.emit('keyPress', {
+						inputId: 'mouseAngle',
+						state: angle
+					});
+				}
 			//}
-				
-				angle = angle * 180 / Math.PI;
-				
-				//console.log(angle);
-				socket.emit('keyPress', {
-					inputId: 'mouseAngle',
-					state: angle
-				});
-			}
-			
-			
+
 		</script>
 	</body>
 </html>
